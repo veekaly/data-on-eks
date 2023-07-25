@@ -32,6 +32,8 @@ locals {
   vpc_cidr = var.vpc_cidr
   azs      = slice(data.aws_availability_zones.available.names, 0, 2)
 
+  route53_zone_arns = [for hostedzone in var.r53_hosted_zones : "arn:aws:route53:::hostedzone/${hostedzone}"]
+
   tags = merge(var.tags, {
     Blueprint  = local.name
     GithubRepo = "github.com/awslabs/data-on-eks"

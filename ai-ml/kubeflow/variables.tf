@@ -40,3 +40,9 @@ variable "private_subnets" {
   type        = list(string)
   default     = ["10.1.0.0/17", "10.1.128.0/18"]
 }
+
+variable "r53_hosted_zones" {
+  description = "Hosted Zone ID of an existing Route53 Domain for service discovery"
+  type        = list(string)
+  default     = ["Z077410331VPQXLL3LC23"]
+}
