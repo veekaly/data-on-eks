@@ -102,6 +102,7 @@ module "eks_blueprints_addons" {
   #---------------------------------------
   enable_cert_manager = true
   cert_manager_route53_hosted_zone_arns = local.route53_zone_arns
+  enable_aws_privateca_issuer = true
 
   #---------------------------------------
   # AWS for FluentBit - DaemonSet
