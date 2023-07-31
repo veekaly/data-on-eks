@@ -125,6 +125,62 @@ module "eks_blueprints_addons" {
 }
 
 #---------------------------------------------------------------
+# Istio Resources
+#---------------------------------------------------------------
+resource "kubernetes_namespace" "istio_system_namespace" {
+  metadata {
+    name = "istio-system"
+    labels = {
+      istio-operator-managed = "Reconcile"
+      istio-injection = "disabled"
+    }
+  }
+}
+
+resource "kubernetes_namespace" "istio_ingress_namespace" {
+  metadata {
+    name = "istio-ingress"
+    labels = {
+      istio-injection = "enabled"
+    }
+  }
+}
+
+resource "helm_release" "istio_base" {
+  name       = "istio"
+  namespace  = "istio-system"
+
+  repository = "https://istio-release.storage.googleapis.com/charts"
+  chart      = "base"
+
+  depends_on = [kubernetes_namespace.istio_system_namespace]
+}
+
+resource "helm_release" "istiod" {
+  name       = "istiod"
+  namespace  = "istio-system"
+
+  repository = "https://istio-release.storage.googleapis.com/charts"
+  chart      = "istiod"
+
+  values     = [templatefile("${path.module}/helm-values/istiod-values.yaml", {})]
+
+  depends_on = [kubernetes_namespace.istio_system_namespace]
+}
+
+resource "helm_release" "istio_ingressgateway" {
+  name       = "istio-ingressgateway"
+  namespace  = "istio-ingress"
+
+  repository = "https://istio-release.storage.googleapis.com/charts"
+  chart      = "gateway"
+
+  values     = [templatefile("${path.module}/helm-values/istio-gateway-values.yaml", {})]
+
+  depends_on = [kubernetes_namespace.istio_ingress_namespace, helm_release.istiod]
+}
+
+#---------------------------------------------------------------
 # Grafana Admin credentials resources
 #---------------------------------------------------------------
 data "aws_secretsmanager_secret_version" "admin_password_version" {
