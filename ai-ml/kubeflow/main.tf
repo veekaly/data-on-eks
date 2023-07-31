@@ -55,6 +55,18 @@ module "eks" {
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
 
+  # Allow cluster to node communication on port 15017 (istiod webhook port)
+  node_security_group_additional_rules = {
+    ingress_self_istiod = {
+      description                   = "Cluster API to node 15017/tcp istiod webhook"
+      protocol                      = "tcp"
+      from_port                     = 15017
+      to_port                       = 15017
+      type                          = "ingress"
+      source_cluster_security_group = true
+    }
+  }
+
   eks_managed_node_groups = {
     node_group_one = {
       name        = "node-group-one"
