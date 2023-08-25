@@ -110,9 +110,9 @@ module "eks" {
 
       # aws ssm get-parameters --names /aws/service/eks/optimized-ami/1.27/amazon-linux-2/recommended/image_id --region us-west-2
       ami_type     = "AL2_x86_64" # Use this for Graviton AL2_ARM_64
-      min_size     = 2
+      min_size     = 3
       max_size     = 8
-      desired_size = 2
+      desired_size = 3
 
       instance_types = ["m5.xlarge"]
 
@@ -151,6 +151,10 @@ module "eks" {
         # Mount will be: /mnt/k8s-disks
         export LOCAL_DISKS='raid0'
 
+        # Install Neuron monitoring tools
+        yum install aws-neuronx-tools-2.* -y
+        export PATH=/opt/aws/neuron/bin:$PATH
+
         # EFA Setup for Trainium and Inferentia
         export FI_EFA_USE_DEVICE_RDMA=1
         export FI_PROVIDER=efa
@@ -171,9 +175,9 @@ module "eks" {
         echo "Bootstrap complete. Ready to Go!"
       EOT
 
-      min_size     = 2
+      min_size     = 0
       max_size     = 2
-      desired_size = 2
+      desired_size = 0
 
       # EFA Network Interfaces configuration for Trn1.32xlarge
       network_interfaces = [
@@ -250,7 +254,8 @@ module "eks" {
       # }
 
       labels = {
-        WorkerType = "trn1-32xl"
+        instance-type = "trn1-32xl"
+        provisioner   = "cluster-autoscaler"
       }
 
       taints = [
@@ -291,6 +296,10 @@ module "eks" {
         # https://github.com/awslabs/amazon-eks-ami/blob/056e31f8c7477e893424abce468cb32bbcd1f079/files/bootstrap.sh#L35C121-L35C126
         # Mount will be: /mnt/k8s-disks
         export LOCAL_DISKS='raid0'
+
+        # Install Neuron monitoring tools
+        yum install aws-neuronx-tools-2.* -y
+        export PATH=/opt/aws/neuron/bin:$PATH
 
         # EFA Setup for Trainium and Inferentia
         export FI_EFA_USE_DEVICE_RDMA=1
@@ -455,7 +464,8 @@ module "eks" {
       # }
 
       labels = {
-        WorkerType = "trn1n-32xl"
+        instance-type = "trn1n-32xl"
+        provisioner   = "cluster-autoscaler"
       }
 
       taints = [
