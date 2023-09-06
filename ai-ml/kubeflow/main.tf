@@ -16,6 +16,45 @@ provider "helm" {
   }
 }
 
+provider "kustomization" {
+    kubeconfig_raw         = yamlencode(local.kubeconfig)
+    context                = local.kubeconfig_context
+}
+
+locals {
+  kubeconfig_context = "_terraform-kustomization-${module.eks.cluster_name}_"
+
+  kubeconfig = {
+    apiVersion = "v1"
+    clusters = [
+      {
+        name = local.kubeconfig_context
+        cluster = {
+          certificate-authority-data = module.eks.cluster_certificate_authority_data
+          server                     = module.eks.cluster_endpoint
+        }
+      }
+    ]
+    users = [
+      {
+        name = local.kubeconfig_context
+        user = {
+          token = data.aws_eks_cluster_auth.this.token
+        }
+      }
+    ]
+    contexts = [
+      {
+        name = local.kubeconfig_context
+        context = {
+          cluster = local.kubeconfig_context
+          user    = local.kubeconfig_context
+        }
+      }
+    ]
+  }
+}
+
 data "aws_eks_cluster_auth" "this" {
   name = module.eks.cluster_name
 }
@@ -54,18 +93,6 @@ module "eks" {
 
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
-
-  # Allow cluster to node communication on port 15017 (istiod webhook port)
-  node_security_group_additional_rules = {
-    ingress_self_istiod = {
-      description                   = "Cluster API to node 15017/tcp istiod webhook"
-      protocol                      = "tcp"
-      from_port                     = 15017
-      to_port                       = 15017
-      type                          = "ingress"
-      source_cluster_security_group = true
-    }
-  }
 
   eks_managed_node_groups = {
     node_group_one = {

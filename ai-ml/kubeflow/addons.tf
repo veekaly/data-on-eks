@@ -98,6 +98,13 @@ module "eks_blueprints_addons" {
   enable_external_secrets = true
 
   #---------------------------------------
+  # Adding Cert Manager
+  #---------------------------------------
+  enable_cert_manager = true
+  cert_manager_route53_hosted_zone_arns = local.route53_zone_arns
+  enable_aws_privateca_issuer = true
+
+  #---------------------------------------
   # AWS for FluentBit - DaemonSet
   #---------------------------------------
   enable_aws_for_fluentbit = true
@@ -115,6 +122,12 @@ module "eks_blueprints_addons" {
   # }
 
   tags = local.tags
+}
+
+module "kubeflow_addon" {
+  source = "../../../terraform-aws-eks-data-addons"
+
+  oidc_provider_arn = module.eks.oidc_provider_arn
 }
 
 #---------------------------------------------------------------
