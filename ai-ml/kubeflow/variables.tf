@@ -1,6 +1,6 @@
 variable "name" {
   description = "Name of the VPC and EKS Cluster"
-  default     = "kubeflow-eks"
+  default     = "kubeflow-test"
   type        = string
 }
 

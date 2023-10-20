@@ -108,26 +108,8 @@ module "eks_blueprints_addons" {
   # AWS for FluentBit - DaemonSet
   #---------------------------------------
   enable_aws_for_fluentbit = true
-  # aws_for_fluentbit_cw_log_group = {
-  #   use_name_prefix   = false
-  #   name              = "/${local.name}/aws-fluentbit-logs" # Add-on creates this log group
-  #   retention_in_days = 30
-  # }
-  # aws_for_fluentbit = {
-  #   values = [templatefile("${path.module}/helm-values/aws-for-fluentbit-values.yaml", {
-  #     region               = local.region
-  #     cloudwatch_log_group = "/${local.name}/aws-fluentbit-logs"
-  #     cluster_name         = module.eks.cluster_name
-  #   })]
-  # }
 
   tags = local.tags
-}
-
-module "kubeflow_addon" {
-  source = "../../../terraform-aws-eks-data-addons"
-
-  oidc_provider_arn = module.eks.oidc_provider_arn
 }
 
 #---------------------------------------------------------------
